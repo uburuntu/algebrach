@@ -133,3 +133,6 @@ cython_debug/
 
 # PyCharm
 .idea/
+
+# Git files
+*.git/

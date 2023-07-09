@@ -1,0 +1,66 @@
+[tool.poetry]
+name = "algebrach"
+license = "MIT"
+homepage = "https://t.me/algebrach_bot"
+repository = "https://github.com/uburuntu/algebrach"
+authors = ["uburuntu <ramzan.bekbulatov@pm.me>"]
+version = "1.0.0"
+description = "A Telegram bot for the https://t.me/mechmath community"
+readme = "README.md"
+packages = [{ include = "app" }]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+# Beta8 is not published yet, so getting it directly from GitHub
+# aiogram = { version = "^3.0.0b8", extras = ["fast", "i18n", "redis"], allow-prereleases = true }
+aiogram = { git = "https://github.com/aiogram/aiogram.git", rev = "31c11c3", extras = ["fast", "i18n", "redis"] }
+pydantic = "^2.0.2"
+pydantic-settings = "^2.0.1"
+pyairtable = "^1.5.0"
+pytz = "^2023.3"
+throttler = "^1.2.2"
+aiocache = "^0.12.1"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^6.0.0"
+pytest-mock = "*"
+pre-commit = "^2.6"
+black = "^23.3.0"
+ruff = "^0.0.277"
+ipython = "^8.14.0"
+msgpack = "^1.0.5"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.ruff]
+fix = true
+unfixable = [
+    "ERA", # do not autoremove commented out code
+    "F841", # do not autoremove unused variables
+]
+target-version = "py311"
+line-length = 88
+extend-select = [
+    "B", # flake8-bugbear
+    "C4", # flake8-comprehensions
+    "I", # isort
+    "N", # pep8-naming
+    "PIE", # flake8-pie
+    "PGH", # pygrep
+    "RUF", # ruff checks
+    "TCH", # flake8-type-checking
+    "TID", # flake8-tidy-imports
+    "UP", # pyupgrade
+]
+
+[tool.ruff.isort]
+known-local-folder = ["app", "tests"]
+combine-as-imports = true
+lines-between-types = 1
+
+[tool.black]
+target-version = ['py311']
+line-length = 88
+preview = true

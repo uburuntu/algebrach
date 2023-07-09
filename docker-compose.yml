@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  algebrach:
+    container_name: algebrach
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file:
+      - app/.env.prod
+    environment:
+      IS_DOCKER: 'True'
+    command: bash entrypoint.sh
+    restart: unless-stopped
