@@ -28,6 +28,8 @@ async def help_(message: types.Message):
             "\n\n",
             "• /kek — кек пек",
             "\n\n",
+            "• /kek_add — отправляет цитируемое сообщение (reply) в предложку для новых кеков",
+            "\n\n",
             as_line("Обратная связь: ", Code("@rm_bk")),
             as_line(
                 "Код бота: ",
