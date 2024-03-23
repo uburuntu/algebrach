@@ -16,9 +16,9 @@ def user_info(user: User, sender_chat: Chat = None) -> str:
 def chat_info(chat: Chat) -> str:
     if chat.type == "private":
         return "private"
-    else:
-        username = ", @" + chat.username if chat.username else ""
-        return f"{chat.type} | {chat.title} ({chat.id}{username})"
+
+    username = ", @" + chat.username if chat.username else ""
+    return f"{chat.type} | {chat.title} ({chat.id}{username})"
 
 
 def message_info(message: Message) -> str:
