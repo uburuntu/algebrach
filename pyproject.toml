@@ -20,13 +20,13 @@ throttler = "^1.2.2"
 aiocache = "^0.12.1"
 
 [tool.poetry.group.dev.dependencies]
-pytest = "^6.0.0"
+pytest = "*"
 pytest-mock = "*"
-pre-commit = "^2.6"
-black = "^23.3.0"
-ruff = "^0.0.277"
-ipython = "^8.14.0"
-msgpack = "^1.0.5"
+pytest-asyncio = "*"
+pre-commit = "*"
+black = "*"
+ruff = "*"
+ipython = "*"
 
 [build-system]
 requires = ["poetry-core"]
