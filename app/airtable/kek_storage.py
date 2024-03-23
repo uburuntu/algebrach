@@ -37,6 +37,20 @@ class KekStorage:
             raise TimeoutError()
         return result
 
+    def upsert_user(self, user: User):
+        user_row = {
+            "fields": {
+                "TelegramID": user.id,
+                "Name": user.full_name,
+                "Username": user.username,
+                "LanguageCode": user.language_code,
+            }
+        }
+
+        records = self.users.batch_upsert([user_row], key_fields=["TelegramID"])
+
+        return records[0]["id"]
+
     def add(
         self,
         author: User,
@@ -47,23 +61,8 @@ class KekStorage:
         attachment_filename: str | None,
         attachment_file_id: str | None,
     ):
-        author_row, suggestor_row = (
-            {
-                "fields": {
-                    "TelegramID": u.id,
-                    "Name": u.full_name,
-                    "Username": u.username,
-                    "LanguageCode": u.language_code,
-                }
-            }
-            for u in (author, suggestor)
-        )
-
-        records = self.users.batch_upsert([author_row], key_fields=["TelegramID"])
-        author_record_id = records[0]["id"]
-
-        records = self.users.batch_upsert([suggestor_row], key_fields=["TelegramID"])
-        suggestor_record_id = records[0]["id"]
+        author_record_id = self.upsert_user(author)
+        suggestor_record_id = self.upsert_user(suggestor)
 
         row = {
             "Text": text,
@@ -77,6 +76,7 @@ class KekStorage:
             "Author": [author_record_id],
             "Suggestor": [suggestor_record_id],
         }
+
         return self.suggestions.create(row)
 
     async def async_add(
@@ -112,20 +112,7 @@ class KekStorage:
         attachment_filename: str | None,
         attachment_file_id: str | None,
     ):
-        (author_row,) = (
-            {
-                "fields": {
-                    "TelegramID": u.id,
-                    "Name": u.full_name,
-                    "Username": u.username,
-                    "LanguageCode": u.language_code,
-                }
-            }
-            for u in (author,)
-        )
-
-        records = self.users.batch_upsert([author_row], key_fields=["TelegramID"])
-        author_record_id = records[0]["id"]
+        author_record_id = self.upsert_user(author)
 
         row = {
             "Text": text,
@@ -138,6 +125,7 @@ class KekStorage:
             "AttachmentFileID": attachment_file_id,
             "Author": [author_record_id],
         }
+
         return self.list.create(row)
 
     async def async_push(
