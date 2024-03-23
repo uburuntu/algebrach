@@ -11,13 +11,11 @@ packages = [{ include = "app" }]
 
 [tool.poetry.dependencies]
 python = "^3.11"
-# Beta8 is not published yet, so getting it directly from GitHub
-# aiogram = { version = "^3.0.0b8", extras = ["fast", "i18n", "redis"], allow-prereleases = true }
-aiogram = { git = "https://github.com/aiogram/aiogram.git", rev = "31c11c3", extras = ["fast", "i18n", "redis"] }
+aiogram = { version = "^3.4.1", extras = ["fast", "i18n", "redis"] }
 pydantic = "^2.0.2"
 pydantic-settings = "^2.0.1"
 pyairtable = "^1.5.0"
-pytz = "^2023.3"
+pytz = "^2024.1"
 throttler = "^1.2.2"
 aiocache = "^0.12.1"
 
