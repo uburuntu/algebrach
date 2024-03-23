@@ -1,6 +1,8 @@
 import asyncio
 
 from aiogram import Bot, Dispatcher
+from aiogram.client.default import DefaultBotProperties
+
 from handlers import basic, kek
 from middlewares.event_context import EventContextMiddleware
 from middlewares.log_updates import LogUpdatesMiddleware
@@ -8,11 +10,17 @@ from settings import config
 
 
 async def main():
+    default = DefaultBotProperties(
+        parse_mode="HTML",
+        disable_notification=True,
+        protect_content=False,
+        allow_sending_without_reply=True,
+        link_preview_is_disabled=True,
+    )
+
     bot = Bot(
         token=config.telegram_bot_token,
-        parse_mode="HTML",
-        disable_web_page_preview=True,
-        protect_content=False,
+        default=default,
     )
 
     dp = Dispatcher()
