@@ -39,6 +39,9 @@ target-version = "py311"
 line-length = 88
 
 [tool.ruff.lint]
+ignore = [
+    "RUF001", # do not highlight cyrillic characters in code
+]
 unfixable = [
     "ERA", # do not autoremove commented out code
     "F841", # do not autoremove unused variables

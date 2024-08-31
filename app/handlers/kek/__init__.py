@@ -12,6 +12,7 @@ from handlers.kek.kek_add import (
     kek_add_non_mechmath,
     kek_push,
 )
+from handlers.kek.kek_info import cmd_kek_info
 from handlers.kek.surprise_kek import surprise_kek
 
 # Respectfully migrated from: https://github.com/arvego/mm-randbot/blob/master/commands/kek.py
@@ -48,9 +49,13 @@ router.message.register(
     F.reply_to_message.as_("reply_to_message"),
 )
 
-
 router.message.register(
     kek_add_no_reply,
     Command("kek_add"),
     F.chat.id == config.mechmath_chat_id,
+)
+
+router.message.register(
+    cmd_kek_info,
+    Command("kek_info"),
 )
