@@ -1,6 +1,9 @@
+from unittest.mock import Mock
+
 import pytest
-from unittest.mock import Mock, patch
+
 from aiogram.types import User
+
 from app.airtable.kek_storage import KekStorage
 
 

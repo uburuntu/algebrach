@@ -2,7 +2,6 @@ import asyncio
 
 from aiogram import Bot, Dispatcher
 from aiogram.client.default import DefaultBotProperties
-
 from handlers import basic, kek
 from middlewares.event_context import EventContextMiddleware
 from middlewares.log_updates import LogUpdatesMiddleware

@@ -1,5 +1,6 @@
 import pytest
-from app.common.utils import one_liner, percent_chance, get_logger
+
+from app.common.utils import get_logger, one_liner, percent_chance
 
 
 def test_one_liner():

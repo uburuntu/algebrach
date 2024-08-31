@@ -35,12 +35,14 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.ruff]
 fix = true
+target-version = "py311"
+line-length = 88
+
+[tool.ruff.lint]
 unfixable = [
     "ERA", # do not autoremove commented out code
     "F841", # do not autoremove unused variables
 ]
-target-version = "py311"
-line-length = 88
 extend-select = [
     "B", # flake8-bugbear
     "C4", # flake8-comprehensions
@@ -54,7 +56,7 @@ extend-select = [
     "UP", # pyupgrade
 ]
 
-[tool.ruff.isort]
+[tool.ruff.lint.isort]
 known-local-folder = ["app", "tests"]
 combine-as-imports = true
 lines-between-types = 1
