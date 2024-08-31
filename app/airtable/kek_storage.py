@@ -164,5 +164,24 @@ class KekStorage:
             raise TimeoutError()
         return result
 
+    def update_file_id(
+        self,
+        kek_id: str,
+        attachment_file_id: str,
+    ):
+        return self.list.update(kek_id, {"AttachmentFileID": attachment_file_id})
+
+    async def async_update_file_id(
+        self,
+        kek_id: str,
+        attachment_file_id: str,
+    ):
+        result, timeouted = await self.executor.run(
+            self.update_file_id, kek_id, attachment_file_id
+        )
+        if timeouted:
+            raise TimeoutError()
+        return result
+
 
 kek_storage = KekStorage()
