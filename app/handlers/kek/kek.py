@@ -3,6 +3,7 @@ import random
 from aiogram.exceptions import TelegramBadRequest
 from aiogram.types import Message
 from airtable.kek_storage import kek_storage
+from common.tg import extract_file_id
 from settings import config
 
 
@@ -25,8 +26,11 @@ async def cmd_kek(message: Message):
         except TelegramBadRequest:
             reply = await method(attachment["url"], caption=text)
             if config.environment == "prod":
-                # todo: fix `file_id` in base in case of exceptions
-                _kek_id = kek["id"]
+                if file_id := extract_file_id(reply):
+                    await kek_storage.async_update_file_id(
+                        kek["id"],
+                        file_id,
+                    )
             return reply
 
     match attachment_type:
