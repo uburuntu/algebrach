@@ -7,7 +7,7 @@ from aiogram.types import TelegramObject, Update
 
 class EventContextMiddleware(UserContextMiddleware):
     """
-    Extracts event's actor, chat and thread_id to the handler's parameters
+    Extracts event's main entities to the handler's parameters
     """
 
     async def __call__(
@@ -19,15 +19,18 @@ class EventContextMiddleware(UserContextMiddleware):
         if not isinstance(event, Update):
             raise RuntimeError("Got an unexpected event type")
 
-        chat, user, thread_id = self.resolve_event_context(event=event)
+        event_context = self.resolve_event_context(event=event)
 
-        if user is not None:
-            data["user"] = user
+        if event_context.user is not None:
+            data["user"] = event_context.user
 
-        if chat is not None:
-            data["chat"] = chat
+        if event_context.chat is not None:
+            data["chat"] = event_context.chat
 
-        if thread_id is not None:
-            data["thread_id"] = thread_id
+        if event_context.thread_id is not None:
+            data["thread_id"] = event_context.thread_id
+
+        if event_context.business_connection_id is not None:
+            data["business_connection_id"] = event_context.business_connection_id
 
         return await handler(event, data)
