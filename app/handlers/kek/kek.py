@@ -30,21 +30,21 @@ async def cmd_kek(message: Message):
             return reply
 
     match attachment_type:
-        case "photo":
-            return await send(message.reply_photo)
+        case "animation":
+            return await send(message.reply_animation)
         case "audio":
             return await send(message.reply_audio)
-        case "voice":
-            return await send(message.reply_voice)
+        case "document":
+            return await send(message.reply_document)
+        case "photo":
+            return await send(message.reply_photo)
         case "sticker":
             return await send(message.reply_sticker)
         case "video":
             return await send(message.reply_video)
         case "video_note":
             return await send(message.reply_video_note)
-        case "animation":
-            return await send(message.reply_animation)
-        case "document":
-            return await send(message.reply_document)
+        case "voice":
+            return await send(message.reply_voice)
         case None:
             return await message.reply(text, disable_web_page_preview=False)
