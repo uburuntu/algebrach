@@ -48,4 +48,4 @@ jobs:
 
     - name: Run tests
       run: |
-        poetry run pytest || true
+        poetry run pytest
