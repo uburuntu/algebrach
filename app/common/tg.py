@@ -3,7 +3,7 @@ from aiogram.types import Chat, Message, TelegramObject, Update, User
 from common.utils import one_liner
 
 
-def user_info(user: User, sender_chat: Chat = None) -> str:
+def user_info(user: User, sender_chat: Chat | None = None) -> str:
     if sender_chat:
         return chat_info(sender_chat)
 
@@ -26,6 +26,26 @@ def message_info(message: Message) -> str:
     if message.text:
         return prefix + one_liner(message.text, cut_len=50)
     return prefix + f"type: {message.content_type}"
+
+
+def extract_file_id(message: Message) -> str | None:
+    if message.animation:
+        return message.animation.file_id
+    if message.audio:
+        return message.audio.file_id
+    if message.document:
+        return message.document.file_id
+    if message.photo:
+        return message.photo[-1].file_id
+    if message.sticker:
+        return message.sticker.file_id
+    if message.video:
+        return message.video.file_id
+    if message.video_note:
+        return message.video_note.file_id
+    if message.voice:
+        return message.voice.file_id
+    return None
 
 
 def decompose_update(
