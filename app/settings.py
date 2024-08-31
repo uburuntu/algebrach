@@ -1,13 +1,14 @@
 from pydantic import Field, HttpUrl
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-# Docs: https://docs.pydantic.dev/2.0/usage/pydantic_settings/
+# Docs: https://docs.pydantic.dev/2.8/concepts/pydantic_settings/
 
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
         # `.env.prod` takes priority over `.env`
-        env_file=(".env", ".env.prod")
+        env_file=(".env", ".env.prod"),
+        env_file_encoding="utf-8",
     )
 
     # App name used in logs
