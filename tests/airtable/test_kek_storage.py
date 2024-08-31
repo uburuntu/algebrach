@@ -1,9 +1,3 @@
-import os
-
-os.environ["ENVIRONMENT"] = "test"
-os.environ["TELEGRAM_BOT_TOKEN"] = "42:ABC"
-os.environ["AIRTABLE_ACCESS_TOKEN"] = "abcABC"
-
 import pytest
 from unittest.mock import Mock, patch
 from aiogram.types import User

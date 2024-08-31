@@ -23,6 +23,7 @@ aiocache = "^0.12.1"
 pytest = "*"
 pytest-mock = "*"
 pytest-asyncio = "*"
+pytest-env = "*"
 pre-commit = "*"
 black = "*"
 ruff = "*"
@@ -68,3 +69,8 @@ pythonpath = ["./app"]
 testpaths = ["tests"]
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "function"
+env = [
+    "ENVIRONMENT=test",
+    "TELEGRAM_BOT_TOKEN=42:ABC",
+    "AIRTABLE_ACCESS_TOKEN=abcABC"
+]
