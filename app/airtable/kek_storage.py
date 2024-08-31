@@ -51,6 +51,30 @@ class KekStorage:
 
         return records[0]["id"]
 
+    def _create_row(
+        self,
+        text,
+        attachment_type,
+        attachment_url,
+        attachment_filename,
+        attachment_file_id,
+        author_record_id,
+        suggestor_record_id=None,
+    ):
+        row = {
+            "Text": text,
+            "AttachmentType": attachment_type,
+            "AttachmentFileID": attachment_file_id,
+            "Author": [author_record_id],
+        }
+        if attachment_url:
+            row["Attachment"] = [
+                {"url": attachment_url, "filename": attachment_filename}
+            ]
+        if suggestor_record_id:
+            row["Suggestor"] = [suggestor_record_id]
+        return row
+
     def add(
         self,
         author: User,
@@ -63,20 +87,15 @@ class KekStorage:
     ):
         author_record_id = self.upsert_user(author)
         suggestor_record_id = self.upsert_user(suggestor)
-
-        row = {
-            "Text": text,
-            "AttachmentType": attachment_type,
-            "Attachment": (
-                [{"url": attachment_url, "filename": attachment_filename}]
-                if attachment_url
-                else None
-            ),
-            "AttachmentFileID": attachment_file_id,
-            "Author": [author_record_id],
-            "Suggestor": [suggestor_record_id],
-        }
-
+        row = self._create_row(
+            text,
+            attachment_type,
+            attachment_url,
+            attachment_filename,
+            attachment_file_id,
+            author_record_id,
+            suggestor_record_id,
+        )
         return self.suggestions.create(row)
 
     async def async_add(
@@ -113,19 +132,14 @@ class KekStorage:
         attachment_file_id: str | None,
     ):
         author_record_id = self.upsert_user(author)
-
-        row = {
-            "Text": text,
-            "AttachmentType": attachment_type,
-            "Attachment": (
-                [{"url": attachment_url, "filename": attachment_filename}]
-                if attachment_url
-                else None
-            ),
-            "AttachmentFileID": attachment_file_id,
-            "Author": [author_record_id],
-        }
-
+        row = self._create_row(
+            text,
+            attachment_type,
+            attachment_url,
+            attachment_filename,
+            attachment_file_id,
+            author_record_id,
+        )
         return self.list.create(row)
 
     async def async_push(
