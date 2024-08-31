@@ -37,6 +37,16 @@ class KekStorage:
             raise TimeoutError()
         return result
 
+    def all_users(self):
+        return self.users.all()
+
+    @cached(ttl=5 * 60, noself=True)
+    async def async_all_users(self):
+        result, timeouted = await self.executor.run(self.all_users)
+        if timeouted:
+            raise TimeoutError()
+        return result
+
     def upsert_user(self, user: User):
         user_row = {
             "fields": {
