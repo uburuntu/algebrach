@@ -1,3 +1,5 @@
+from aiogram import Bot
+from aiogram.exceptions import TelegramBadRequest
 from aiogram.types import Chat, Message, TelegramObject, Update, User
 
 from common.utils import one_liner
@@ -26,26 +28,6 @@ def message_info(message: Message) -> str:
     if message.text:
         return prefix + one_liner(message.text, cut_len=50)
     return prefix + f"type: {message.content_type}"
-
-
-def extract_file_id(message: Message) -> str | None:
-    if message.animation:
-        return message.animation.file_id
-    if message.audio:
-        return message.audio.file_id
-    if message.document:
-        return message.document.file_id
-    if message.photo:
-        return message.photo[-1].file_id
-    if message.sticker:
-        return message.sticker.file_id
-    if message.video:
-        return message.video.file_id
-    if message.video_note:
-        return message.video_note.file_id
-    if message.voice:
-        return message.voice.file_id
-    return None
 
 
 def decompose_update(
@@ -106,3 +88,105 @@ def decompose_update(
         info = update.as_json()
 
     return f, user, sender_chat, chat, info
+
+
+async def create_sensitive_url_from_file_id(bot: Bot, file_id: str) -> str:
+    file = await bot.get_file(file_id)
+    return bot.session.api.file_url(bot.token, file.file_path)
+
+
+def extract_attachment_info(
+    message: Message,
+) -> tuple[str | None, str | None, str | None]:
+    attachment_type = None
+    attachment_file_id = None
+    attachment_filename = None
+
+    if a := message.photo:
+        attachment_type = "photo"
+        attachment_file_id = a[-1].file_id
+    elif a := message.audio:
+        attachment_type = "audio"
+        attachment_file_id = a.file_id
+        attachment_filename = a.file_name
+    elif a := message.voice:
+        attachment_type = "voice"
+        attachment_file_id = a.file_id
+    elif a := message.sticker:
+        attachment_type = "sticker"
+        attachment_file_id = a.file_id
+    elif a := message.video:
+        attachment_type = "video"
+        attachment_file_id = a.file_id
+        attachment_filename = a.file_name
+    elif a := message.video_note:
+        attachment_type = "video_note"
+        attachment_file_id = a.file_id
+    elif a := message.animation:
+        attachment_type = "animation"
+        attachment_file_id = a.file_id
+        attachment_filename = a.file_name
+    elif a := message.document:
+        attachment_type = "document"
+        attachment_file_id = a.file_id
+        attachment_filename = a.file_name
+
+    return attachment_type, attachment_file_id, attachment_filename
+
+
+async def extract_attachment_info_with_url(
+    message: Message,
+) -> tuple[str | None, str | None, str | None, str | None]:
+    attachment_type, attachment_file_id, attachment_filename = extract_attachment_info(
+        message
+    )
+    attachment_url = None
+
+    if attachment_file_id:
+        attachment_url = await create_sensitive_url_from_file_id(
+            message.bot, attachment_file_id
+        )
+
+    return attachment_type, attachment_file_id, attachment_filename, attachment_url
+
+
+def extract_attachment_file_id(message: Message) -> str | None:
+    _, attachment_file_id, _ = extract_attachment_info(message)
+
+    return attachment_file_id
+
+
+async def reply_with_attachment(
+    message: Message,
+    text: str,
+    attachment_type: str,
+    attachment_file_id: str,
+    attachment_url_fallback: str | None = None,
+):
+    async def send(method):
+        try:
+            return await method(attachment_file_id, caption=text)
+        except TelegramBadRequest:
+            if attachment_url_fallback:
+                return await method(attachment_url_fallback, caption=text)
+            raise
+
+    match attachment_type:
+        case "photo":
+            return await send(message.reply_photo)
+        case "audio":
+            return await send(message.reply_audio)
+        case "voice":
+            return await send(message.reply_voice)
+        case "sticker":
+            return await send(message.reply_sticker)
+        case "video":
+            return await send(message.reply_video)
+        case "video_note":
+            return await send(message.reply_video_note)
+        case "animation":
+            return await send(message.reply_animation)
+        case "document":
+            return await send(message.reply_document)
+        case None:
+            return await message.reply(text, disable_web_page_preview=False)
