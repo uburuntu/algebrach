@@ -8,12 +8,14 @@ from settings import config
 
 async def cmd_kek(message: Message):
     keks = await kek_storage.async_all()
-    kek = random.choice(keks)["fields"]
 
-    text = kek.get("Text")
-    attachment = kek.get("Attachment")
-    attachment_type = kek.get("AttachmentType")
-    attachment_file_id = kek.get("AttachmentFileID")
+    kek = random.choice(keks)
+    kek_fields = kek["fields"]
+
+    text = kek_fields.get("Text")
+    attachment = kek_fields.get("Attachment")
+    attachment_type = kek_fields.get("AttachmentType")
+    attachment_file_id = kek_fields.get("AttachmentFileID")
     attachment_url_fallback = attachment and attachment[0]["url"]
 
     reply = await reply_with_attachment(
