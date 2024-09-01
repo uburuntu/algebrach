@@ -19,6 +19,8 @@ class EventContextMiddleware(UserContextMiddleware):
         if not isinstance(event, Update):
             raise RuntimeError("Got an unexpected event type")
 
+        data["bot"] = event.bot
+
         event_context = self.resolve_event_context(event=event)
 
         if event_context.user is not None:
