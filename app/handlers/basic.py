@@ -1,12 +1,13 @@
-from aiogram import Router, types
+from aiogram import Router
 from aiogram.filters import Command, CommandStart
+from aiogram.types import Message
 from aiogram.utils.formatting import Bold, Code, Text, TextLink, as_line
 
 router = Router()
 
 
 @router.message(CommandStart())
-async def start(message: types.Message):
+async def cmd_start(message: Message):
     return await message.reply(
         **Text(
             Bold("Приветствую!"),
@@ -20,7 +21,7 @@ async def start(message: types.Message):
 
 
 @router.message(Command("help"))
-async def help_(message: types.Message):
+async def cmd_help(message: Message):
     return await message.reply(
         **Text(
             Bold("Список доступных команд"),

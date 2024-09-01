@@ -4,7 +4,7 @@ from airtable.kek_storage import kek_storage
 from common.tg import extract_attachment_info_with_url, reply_with_attachment
 
 
-async def kek_add(message: Message, reply_to_message: Message):
+async def cmd_kek_add(message: Message, reply_to_message: Message):
     text = reply_to_message.html_text
 
     attachment_type, attachment_file_id, attachment_filename, attachment_url = (
@@ -27,7 +27,7 @@ async def kek_add(message: Message, reply_to_message: Message):
     )
 
 
-async def kek_push(message: Message, reply_to_message: Message):
+async def cmd_kek_push(message: Message, reply_to_message: Message):
     text = reply_to_message.html_text
 
     attachment_type, attachment_file_id, attachment_filename, attachment_url = (
@@ -48,9 +48,9 @@ async def kek_push(message: Message, reply_to_message: Message):
     )
 
 
-async def kek_add_no_reply(message: Message):
+async def cmd_kek_add_no_reply(message: Message):
     return await message.reply("↪️ Кеки нужно предлагать реплаем на сообщение")
 
 
-async def kek_add_non_mechmath(message: Message):
+async def cmd_kek_add_non_mechmath(message: Message):
     return await message.reply("➡️ Кеки можно предлагать только в @mechmath")

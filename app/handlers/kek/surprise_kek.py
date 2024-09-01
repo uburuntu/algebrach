@@ -9,7 +9,7 @@ from settings import config
 from handlers.kek import cmd_kek
 
 
-async def surprise_kek(message: Message, user: User, chat: Chat):
+async def cmd_surprise_kek(message: Message, user: User, chat: Chat):
     surprise = await message.reply_animation(
         config.surprise_gif,
         caption="Предупреждал же, что кикну. Если не предупреждал, то",
