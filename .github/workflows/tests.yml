@@ -46,6 +46,13 @@ jobs:
         poetry run ruff check .
         poetry run black --check .
 
-    - name: Run tests
+    - name: Run tests with coverage
       run: |
-        poetry run pytest
+        poetry run pytest --cov=app --cov-report=term-missing --cov-report=xml
+
+    - name: Upload coverage reports
+      uses: codecov/codecov-action@v3
+      if: always()
+      with:
+        file: ./coverage.xml
+        fail_ci_if_error: false
