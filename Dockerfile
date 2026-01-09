@@ -1,42 +1,46 @@
-# Initial temporary stage to build dependecies only
-FROM python:3.11-buster as builder
+# Build stage for installing dependencies
+FROM python:3.14-slim AS builder
 
 #
 ## Expected folder view at the end:
 ##
 ## /
 ## └── usr
-##     ├── .venv
-##     │   └── bin/
 ##     └── app
+##         ├── .venv/
 ##         ├── __main__.py
 ##         └── entrypoint.sh
 #
 
-# Environment variables to build a virtual environment
-ENV POETRY_NO_INTERACTION=1 \
-    POETRY_VIRTUALENVS_IN_PROJECT=1 \
-    POETRY_VIRTUALENVS_CREATE=1 \
-    POETRY_HOME=/opt/poetry \
-    POETRY_CACHE_DIR=/tmp/poetry/cache
-
-RUN curl -sSL --retry 3 --max-time 10 https://raw.githubusercontent.com/python-poetry/install.python-poetry.org/main/install-poetry.py | python3 - --version 1.5.0
+# Copy uv binary from official image
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
 # Set up a working directory
-WORKDIR /usr
+WORKDIR /usr/app
 
-# Include Poetry files
-COPY pyproject.toml poetry.lock ./
+# Environment variables for uv
+ENV UV_COMPILE_BYTECODE=1 \
+    UV_LINK_MODE=copy
 
-# Install dependencies
-RUN $POETRY_HOME/bin/poetry install --without dev --no-root && rm -rf $POETRY_CACHE_DIR
+# Install dependencies (cached layer)
+RUN --mount=type=cache,target=/root/.cache/uv \
+    --mount=type=bind,source=uv.lock,target=uv.lock \
+    --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
+    uv sync --locked --no-install-project --no-dev
 
-# Final stage to run an app
-FROM python:3.11-slim as runtime
+# Copy application code
+COPY app .
+COPY pyproject.toml uv.lock ./
 
-# Environment variables to build and run a final stage
-ENV VENV_PATH=/usr/.venv \
-    PATH=/usr/.venv/bin:$PATH
+# Sync the project
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --locked --no-dev
+
+# Final stage to run the app
+FROM python:3.14-slim AS runtime
+
+# Environment variables for runtime
+ENV PATH=/usr/app/.venv/bin:$PATH
 
 # Set up a working directory
 WORKDIR /usr/app
@@ -44,17 +48,14 @@ WORKDIR /usr/app
 # Create a user without root permissions
 RUN addgroup --system app && adduser --system --group app
 
+# Include prepared venv and app from the builder stage
+COPY --from=builder --chown=app:app /usr/app /usr/app
+
 # Remove root permissions by using a restricted user
 USER app
 
 # Healthcheck to check the process is running
 HEALTHCHECK CMD pgrep -f "python" >/dev/null
-
-# Include prepared dependencies from the previous stage
-COPY --from=builder ${VENV_PATH} ${VENV_PATH}
-
-# Include app's code
-COPY app .
 
 # App's main entrypoint
 ENTRYPOINT ["bash", "entrypoint.sh"]
