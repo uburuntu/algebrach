@@ -1,6 +1,6 @@
 # 🤖 Algebrach Bot, Remastered
 
-[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 
 https://t.me/algebrach_bot
 
@@ -32,30 +32,24 @@ https://t.me/algebrach_bot
 
 ## Local development
 
-### Install Python 3.11
+### Install Python 3.14
 
 https://www.python.org/downloads/
 
 ### Install dependencies
 
-Using [`poetry`](https://python-poetry.org/docs/#installing-with-the-official-installer) (recommended):
+Using [`uv`](https://docs.astral.sh/uv/getting-started/installation/) (recommended):
 
 ```bash
-poetry install --no-root
+uv sync
 ```
 
 Or by using `pip` in a virtual environment (acceptable):
 
 ```bash
-python3.11 -m venv ./venv
+python3.14 -m venv ./venv
 source ./venv/bin/activate
-pip install -r requirements.txt
-```
-
-Or by using `pip` directly (not recommended):
-
-```bash
-pip3.11 install -r requirements.txt
+pip install -e .
 ```
 
 ### Start the bot
@@ -71,8 +65,7 @@ nano .env
 To run:
 
 ```bash
-# Replace `python` with `python3.11` if you didn't create virtual environment
-python -u __main__.py
+uv run python -u __main__.py
 ```
 
 ### Used dev tools
@@ -87,16 +80,12 @@ pre-commit install --install-hooks
 pre-commit run
 ```
 
-[Black Formatter](https://github.com/psf/black/) with settings from [pyproject.toml](pyproject.toml) file:
+[Ruff](https://github.com/astral-sh/ruff/) for linting and formatting, with settings from [pyproject.toml](pyproject.toml) file:
 
 ```bash
 # To format project files
-black .
-```
+ruff format .
 
-[Ruff Linter](https://github.com/astral-sh/ruff/) with settings from [pyproject.toml](pyproject.toml) file:
-
-```bash
 # To detect linter issues and auto fix them where applicable
 ruff check --fix .
 
