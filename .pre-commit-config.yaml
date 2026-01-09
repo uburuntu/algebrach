@@ -10,37 +10,33 @@
 
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.4.0
+    rev: v6.0.0
     hooks:
+      - id: check-added-large-files
+        args: [--maxkb=500]
       - id: check-ast
       - id: check-case-conflict
       - id: check-docstring-first
       - id: check-executables-have-shebangs
+      - id: check-illegal-windows-names
       - id: check-json
       - id: check-merge-conflict
       - id: check-shebang-scripts-are-executable
+      - id: check-symlinks
       - id: check-toml
       - id: check-yaml
       - id: debug-statements
       - id: destroyed-symlinks
+      - id: detect-private-key
       - id: end-of-file-fixer
       - id: mixed-line-ending
+      - id: name-tests-test
+        args: [--pytest-test-first]
       - id: trailing-whitespace
 
-  - repo: https://github.com/psf/black
-    rev: 23.3.0
-    hooks:
-      - id: black
-
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.0.277
+    rev: v0.14.11
     hooks:
       - id: ruff
-
-  - repo: https://github.com/python-poetry/poetry
-    rev: 1.5.0
-    hooks:
-      - id: poetry-check
-      - id: poetry-lock
-      - id: poetry-export
-        args: [ "-f", "requirements.txt", "-o", "requirements.txt", "--without-hashes" ]
+        args: [--fix]
+      - id: ruff-format
