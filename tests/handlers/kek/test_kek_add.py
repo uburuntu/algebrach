@@ -119,4 +119,3 @@ class TestCmdKekAddNonMechmath:
         msg.reply.assert_awaited_once()
         reply_text = msg.reply.call_args.args[0]
         assert "@mechmath" in reply_text
-

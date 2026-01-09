@@ -13,6 +13,7 @@ from handlers.kek.kek_add import (
     cmd_kek_push,
 )
 from handlers.kek.kek_info import cmd_kek_info
+from handlers.kek.kek_inline import router as kek_inline_router
 from handlers.kek.surprise_kek import cmd_surprise_kek
 
 # Respectfully migrated from: https://github.com/arvego/mm-randbot/blob/master/commands/kek.py
@@ -59,3 +60,6 @@ router.message.register(
     cmd_kek_info,
     Command("kek_info"),
 )
+
+# Inline query handlers
+router.include_router(kek_inline_router)

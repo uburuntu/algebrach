@@ -3,7 +3,6 @@
 import pytest
 
 from app.handlers.basic import cmd_help, cmd_start
-
 from tests.conftest import make_message
 
 
@@ -66,4 +65,3 @@ class TestCmdHelp:
 
         call_kwargs = msg.reply.call_args.kwargs
         assert "uburuntu/algebrach" in call_kwargs["text"]
-

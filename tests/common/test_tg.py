@@ -8,7 +8,6 @@ from aiogram.types import (
     Animation,
     Audio,
     CallbackQuery,
-    Chat,
     Document,
     InlineQuery,
     PhotoSize,
@@ -28,7 +27,6 @@ from app.common.tg import (
     reply_with_attachment,
     user_info,
 )
-
 from tests.conftest import (
     make_bot,
     make_chat,
@@ -36,7 +34,6 @@ from tests.conftest import (
     make_update,
     make_user,
 )
-
 
 # =============================================================================
 # user_info tests
@@ -151,7 +148,7 @@ class TestDecomposeUpdate:
         msg = make_message(message_id=1, text="Hello")
         update = make_update(message=msg)
 
-        f, user, sender_chat, chat, info = decompose_update(update)
+        f, user, _sender_chat, chat, info = decompose_update(update)
 
         assert f == msg
         assert user == msg.from_user
@@ -162,7 +159,7 @@ class TestDecomposeUpdate:
         msg = make_message(message_id=1, text="Edited text")
         update = make_update(edited_message=msg)
 
-        f, user, sender_chat, chat, info = decompose_update(update)
+        f, _user, _sender_chat, _chat, info = decompose_update(update)
 
         assert f == msg
         assert "[edited]" in info
@@ -174,7 +171,7 @@ class TestDecomposeUpdate:
         inline_query.query = "search term"
         update = make_update(inline_query=inline_query)
 
-        f, user_result, sender_chat, chat, info = decompose_update(update)
+        f, user_result, _sender_chat, _chat, info = decompose_update(update)
 
         assert f == inline_query
         assert user_result == user
@@ -189,7 +186,7 @@ class TestDecomposeUpdate:
         callback_query.data = "button_clicked"
         update = make_update(callback_query=callback_query)
 
-        f, user_result, sender_chat, chat, info = decompose_update(update)
+        f, user_result, _sender_chat, chat, info = decompose_update(update)
 
         assert f == callback_query
         assert user_result == user
@@ -242,7 +239,7 @@ class TestExtractAttachmentInfo:
         voice.file_id = "voice_abc123"
         msg.voice = voice
 
-        att_type, file_id, filename = extract_attachment_info(msg)
+        att_type, file_id, _filename = extract_attachment_info(msg)
 
         assert att_type == "voice"
         assert file_id == "voice_abc123"
@@ -253,7 +250,7 @@ class TestExtractAttachmentInfo:
         sticker.file_id = "sticker_abc123"
         msg.sticker = sticker
 
-        att_type, file_id, filename = extract_attachment_info(msg)
+        att_type, file_id, _filename = extract_attachment_info(msg)
 
         assert att_type == "sticker"
         assert file_id == "sticker_abc123"
@@ -277,7 +274,7 @@ class TestExtractAttachmentInfo:
         video_note.file_id = "videonote_abc123"
         msg.video_note = video_note
 
-        att_type, file_id, filename = extract_attachment_info(msg)
+        att_type, file_id, _filename = extract_attachment_info(msg)
 
         assert att_type == "video_note"
         assert file_id == "videonote_abc123"
@@ -359,7 +356,7 @@ class TestReplyWithAttachment:
     async def test_reply_text_only(self):
         msg = make_message()
 
-        result = await reply_with_attachment(msg, "Hello!", None, None)
+        await reply_with_attachment(msg, "Hello!", None, None)
 
         msg.reply.assert_awaited_once_with("Hello!", disable_web_page_preview=False)
 
@@ -447,4 +444,3 @@ class TestReplyWithAttachment:
         msg.reply_photo.assert_awaited_with(
             "https://fallback.url/photo.jpg", caption="Caption"
         )
-

@@ -7,7 +7,6 @@ import pytest
 from aiogram.dispatcher.event.bases import UNHANDLED
 
 from app.middlewares.log_updates import LogUpdatesMiddleware
-
 from tests.conftest import make_chat, make_message, make_update, make_user
 
 
@@ -87,4 +86,3 @@ class TestLogUpdatesMiddleware:
         log = LogUpdatesMiddleware.log_string(update, elapsed_ms=100)
 
         assert "[edited]" in log
-

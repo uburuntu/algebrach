@@ -87,7 +87,9 @@ class TestCmdKek:
 
             await cmd_kek(msg)
 
-        msg.reply_photo.assert_awaited_once_with("photo_id_123", caption="Photo caption")
+        msg.reply_photo.assert_awaited_once_with(
+            "photo_id_123", caption="Photo caption"
+        )
 
     @pytest.mark.asyncio
     async def test_updates_file_id_in_prod(self, mock_storage):
@@ -108,6 +110,7 @@ class TestCmdKek:
         # Make reply return message with different file_id
         reply_msg = make_message()
         from unittest.mock import MagicMock
+
         from aiogram.types import PhotoSize
 
         photo = MagicMock(spec=PhotoSize)
@@ -159,4 +162,3 @@ class TestCmdKek:
             await cmd_kek(msg)
 
         mock_storage.async_update_file_id.assert_not_awaited()
-

@@ -83,10 +83,10 @@ class TestThreadPoolExecutor:
 
 def can_use_process_pool():
     """Check if ProcessPoolExecutor can be used in current environment."""
-    from concurrent.futures import ProcessPoolExecutor as PPE
+    from concurrent.futures import ProcessPoolExecutor as StdProcessPoolExecutor
 
     try:
-        executor = PPE(max_workers=1)
+        executor = StdProcessPoolExecutor(max_workers=1)
         executor.shutdown(wait=False)
         return True
     except PermissionError:
@@ -126,4 +126,3 @@ class TestProcessPoolExecutor:
         assert result is None
         assert timed_out is True
         executor.shutdown(wait=False)
-

@@ -12,7 +12,6 @@ import pytest
 
 from aiogram.types import Chat, Message, PhotoSize, Update, User
 
-
 # =============================================================================
 # User Fixtures
 # =============================================================================
@@ -110,7 +109,7 @@ def make_message(
     from_user: User | None = None,
     text: str | None = "Test message",
     date: int = 1704067200,
-    reply_to_message: "Message | None" = None,
+    reply_to_message: Message | None = None,
     sender_chat: Chat | None = None,
     **kwargs: Any,
 ) -> MagicMock:
@@ -359,4 +358,3 @@ class HandlerTestContext:
 def handler_context():
     """Fixture providing handler test context."""
     return HandlerTestContext()
-

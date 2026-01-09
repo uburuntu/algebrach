@@ -4,10 +4,7 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from aiogram.types import Update
-
 from app.middlewares.event_context import EventContextMiddleware
-
 from tests.conftest import make_bot, make_chat, make_message, make_update, make_user
 
 

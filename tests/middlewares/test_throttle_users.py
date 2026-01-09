@@ -1,6 +1,7 @@
 """Tests for app/middlewares/throttle_users.py"""
 
 import asyncio
+
 from unittest.mock import AsyncMock
 
 import pytest
@@ -8,7 +9,6 @@ import pytest
 from aiogram.dispatcher.event.bases import UNHANDLED
 
 from app.middlewares.throttle_users import ThrottleUsersMiddleware
-
 from tests.conftest import make_message, make_user
 
 
@@ -104,4 +104,3 @@ class TestThrottleUsersMiddleware:
 
         # User should be cleared from active set
         assert user.id not in middleware.active_users
-

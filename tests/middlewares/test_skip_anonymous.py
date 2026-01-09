@@ -8,7 +8,6 @@ import pytest
 from aiogram.dispatcher.event.bases import UNHANDLED
 
 from app.middlewares.skip_anonymous import SkipAnonymousMessagesMiddleware
-
 from tests.conftest import make_chat, make_message, make_user
 
 
@@ -97,4 +96,3 @@ class TestSkipAnonymousMessagesMiddleware:
 
         msg.reply.assert_awaited_once()
         handler.assert_not_awaited()
-
