@@ -1,8 +1,12 @@
+from typing import TYPE_CHECKING
+
 from aiocache import cached
-from aiogram.types import User
 from common.executor import ThreadPoolExecutor
 from pyairtable import Api, retry_strategy
 from settings import config
+
+if TYPE_CHECKING:
+    from aiogram.types import User
 
 
 class KekStorage:
@@ -19,11 +23,11 @@ class KekStorage:
             retry_strategy=retry_strategy(total=2),
         )
 
-        self.base = self.api.get_base(config.airtable_base_id)
+        self.base = self.api.base(config.airtable_base_id)
 
-        self.list = self.base.get_table("List")
-        self.users = self.base.get_table("Users")
-        self.suggestions = self.base.get_table("Suggestions")
+        self.list = self.base.table("List")
+        self.users = self.base.table("Users")
+        self.suggestions = self.base.table("Suggestions")
 
         self.executor = ThreadPoolExecutor(max_workers=1)
 
