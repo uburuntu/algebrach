@@ -23,7 +23,7 @@ if TYPE_CHECKING:
 
 router = Router(name="kek_inline")
 
-CACHE_TIME = 5 * 60  # 5 minutes, shared across users
+CACHE_TIME = 5 * 60
 
 
 def get_text_keks(keks: list[dict]) -> list[dict]:
@@ -35,31 +35,34 @@ def get_text_keks(keks: list[dict]) -> list[dict]:
     ]
 
 
-def search_keks(keks: list[dict], query: str) -> list[dict]:
-    """Simple case-insensitive substring search."""
+def search_keks(keks: list[dict], query: str, limit: int = 10) -> list[dict]:
+    """Case-insensitive substring search with early exit on limit."""
     query_lower = query.lower()
-    return [k for k in keks if query_lower in k["fields"]["Text"].lower()]
+    results = []
+    for k in keks:
+        if query_lower in k["fields"]["Text"].lower():
+            results.append(k)
+            if len(results) >= limit:
+                break
+    return results
 
 
 def kek_to_result(kek: dict) -> InlineQueryResultArticle:
-    """Convert kek to inline result with placeholder message."""
+    """Convert kek record to InlineQueryResultArticle."""
     text = kek["fields"]["Text"]
-    kek_id = kek["id"]
     preview = one_liner(text, cut_len=100)
 
     return InlineQueryResultArticle(
-        id=kek_id,  # Use kek ID to retrieve it later
+        id=kek["id"],
         title=preview[:50] or "Кек",
         description=preview[50:100] if len(preview) > 50 else None,
-        input_message_content=InputTextMessageContent(
-            message_text="🎲 Выбираю кек...",
-        ),
+        input_message_content=InputTextMessageContent(message_text=text),
     )
 
 
 @router.inline_query(F.query == "")
 async def inline_kek_random(query: InlineQuery) -> Any:
-    """Empty query - offer to send random kek."""
+    """Show option to send a random kek."""
     result = InlineQueryResultArticle(
         id=str(uuid.uuid4()),
         title="🎲 Случайный кек",
@@ -73,10 +76,10 @@ async def inline_kek_random(query: InlineQuery) -> Any:
 
 @router.inline_query(F.query != "")
 async def inline_kek_search(query: InlineQuery) -> Any:
-    """Non-empty query - search keks by text."""
+    """Search keks by text and return matching results."""
     keks = await kek_storage.async_all()
     text_keks = get_text_keks(keks)
-    matches = search_keks(text_keks, query.query)[:10]
+    matches = search_keks(text_keks, query.query, limit=10)
 
     if not matches:
         result = InlineQueryResultArticle(
@@ -95,26 +98,22 @@ async def inline_kek_search(query: InlineQuery) -> Any:
 
 
 @router.chosen_inline_result()
-async def chosen_kek_result(chosen: ChosenInlineResult, bot: Bot) -> None:
-    """Replace placeholder with actual kek text."""
+async def chosen_random_kek(chosen: ChosenInlineResult, bot: Bot) -> None:
+    """Edit placeholder message with actual random kek."""
     if not chosen.inline_message_id:
         return
 
     keks = await kek_storage.async_all()
     text_keks = get_text_keks(keks)
 
-    # If ID matches a kek, use that; otherwise pick random
-    kek = next((k for k in text_keks if k["id"] == chosen.result_id), None)
-    if not kek:
-        kek = random.choice(text_keks) if text_keks else None
-
-    if not kek:
+    if not text_keks:
         await bot.edit_message_text(
             inline_message_id=chosen.inline_message_id,
             text="😢 Кеков пока нет",
         )
         return
 
+    kek = random.choice(text_keks)
     await bot.edit_message_text(
         inline_message_id=chosen.inline_message_id,
         text=kek["fields"]["Text"],

@@ -7,7 +7,7 @@ import pytest
 
 # Import from module directly (not via __init__.py to avoid router attachment issues)
 from handlers.kek.kek_inline import (
-    chosen_kek_result,
+    chosen_random_kek,
     get_text_keks,
     inline_kek_random,
     inline_kek_search,
@@ -84,16 +84,23 @@ class TestSearchKeks:
     def test_empty_keks(self):
         assert search_keks([], "query") == []
 
+    def test_respects_limit(self):
+        keks = [{"id": str(i), "fields": {"Text": f"kek {i}"}} for i in range(20)]
+
+        result = search_keks(keks, "kek", limit=5)
+
+        assert len(result) == 5
+
 
 class TestKekToResult:
-    def test_creates_article_with_placeholder(self):
+    def test_creates_article_with_kek_text(self):
         kek = {"id": "rec123", "fields": {"Text": "This is a kek"}}
 
         result = kek_to_result(kek)
 
         assert result.id == "rec123"
         assert result.title == "This is a kek"
-        assert result.input_message_content.message_text == "🎲 Выбираю кек..."
+        assert result.input_message_content.message_text == "This is a kek"
 
     def test_truncates_long_title(self):
         long_text = "A" * 100
@@ -218,7 +225,7 @@ class TestInlineKekSearch:
         assert len(results) == 10
 
 
-class TestChosenKekResult:
+class TestChosenRandomKek:
     @pytest.fixture
     def mock_storage(self):
         storage = MagicMock()
@@ -240,27 +247,16 @@ class TestChosenKekResult:
         return bot
 
     @pytest.mark.asyncio
-    async def test_edits_message_with_kek_by_id(self, mock_storage, mock_bot):
-        chosen = make_chosen_result(result_id="rec1")
+    async def test_edits_message_with_random_kek(self, mock_storage, mock_bot):
+        chosen = make_chosen_result(result_id="random_uuid")
 
         with patch("handlers.kek.kek_inline.kek_storage", mock_storage):
-            await chosen_kek_result(chosen, mock_bot)
-
-        mock_bot.edit_message_text.assert_awaited_once()
-        call_kwargs = mock_bot.edit_message_text.call_args.kwargs
-        assert call_kwargs["text"] == "First kek"
-        assert call_kwargs["inline_message_id"] == "msg_123"
-
-    @pytest.mark.asyncio
-    async def test_falls_back_to_random_if_id_not_found(self, mock_storage, mock_bot):
-        chosen = make_chosen_result(result_id="unknown_id")
-
-        with patch("handlers.kek.kek_inline.kek_storage", mock_storage):
-            await chosen_kek_result(chosen, mock_bot)
+            await chosen_random_kek(chosen, mock_bot)
 
         mock_bot.edit_message_text.assert_awaited_once()
         call_kwargs = mock_bot.edit_message_text.call_args.kwargs
         assert call_kwargs["text"] in ["First kek", "Second kek"]
+        assert call_kwargs["inline_message_id"] == "msg_123"
 
     @pytest.mark.asyncio
     async def test_handles_empty_storage(self, mock_bot):
@@ -269,7 +265,7 @@ class TestChosenKekResult:
         chosen = make_chosen_result(result_id="any_id")
 
         with patch("handlers.kek.kek_inline.kek_storage", empty_storage):
-            await chosen_kek_result(chosen, mock_bot)
+            await chosen_random_kek(chosen, mock_bot)
 
         mock_bot.edit_message_text.assert_awaited_once()
         call_kwargs = mock_bot.edit_message_text.call_args.kwargs
@@ -280,6 +276,6 @@ class TestChosenKekResult:
         chosen = make_chosen_result(result_id="rec1", inline_message_id=None)
 
         with patch("handlers.kek.kek_inline.kek_storage", mock_storage):
-            await chosen_kek_result(chosen, mock_bot)
+            await chosen_random_kek(chosen, mock_bot)
 
         mock_bot.edit_message_text.assert_not_awaited()
