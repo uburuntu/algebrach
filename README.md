@@ -1,8 +1,6 @@
 # 🤖 Algebrach Bot, Remastered
 
-[![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
-
-https://t.me/algebrach_bot
+Open in Telegram: https://t.me/algebrach_bot
 
 ## Commands
 
