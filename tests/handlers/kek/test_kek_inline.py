@@ -167,7 +167,10 @@ class TestInlineKekSearch:
         storage.async_all = AsyncMock(
             return_value=[
                 {"id": "1", "fields": {"Text": "Hello world", "AttachmentType": None}},
-                {"id": "2", "fields": {"Text": "Goodbye world", "AttachmentType": None}},
+                {
+                    "id": "2",
+                    "fields": {"Text": "Goodbye world", "AttachmentType": None},
+                },
                 {"id": "3", "fields": {"Text": "Photo kek", "AttachmentType": "photo"}},
             ]
         )
@@ -222,7 +225,10 @@ class TestChosenKekResult:
         storage.async_all = AsyncMock(
             return_value=[
                 {"id": "rec1", "fields": {"Text": "First kek", "AttachmentType": None}},
-                {"id": "rec2", "fields": {"Text": "Second kek", "AttachmentType": None}},
+                {
+                    "id": "rec2",
+                    "fields": {"Text": "Second kek", "AttachmentType": None},
+                },
             ]
         )
         return storage
@@ -277,4 +283,3 @@ class TestChosenKekResult:
             await chosen_kek_result(chosen, mock_bot)
 
         mock_bot.edit_message_text.assert_not_awaited()
-
