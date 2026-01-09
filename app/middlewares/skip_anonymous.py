@@ -1,11 +1,14 @@
 from collections import defaultdict
-from collections.abc import Awaitable, Callable
 from datetime import datetime, timedelta
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from aiogram import BaseMiddleware
 from aiogram.dispatcher.event.bases import UNHANDLED
-from aiogram.types import Message
+
+if TYPE_CHECKING:
+    from collections.abc import Awaitable, Callable
+
+    from aiogram.types import Message
 
 
 class SkipAnonymousMessagesMiddleware(BaseMiddleware):

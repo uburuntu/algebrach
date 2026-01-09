@@ -1,8 +1,11 @@
 from collections import Counter
+from typing import TYPE_CHECKING
 
-from aiogram.types import Message
 from aiogram.utils.formatting import Bold, Text, TextLink, as_line
 from airtable.kek_storage import kek_storage
+
+if TYPE_CHECKING:
+    from aiogram.types import Message
 
 
 async def cmd_kek_info(message: Message):

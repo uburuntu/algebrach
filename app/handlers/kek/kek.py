@@ -1,9 +1,13 @@
 import random
 
-from aiogram.types import Message
+from typing import TYPE_CHECKING
+
 from airtable.kek_storage import kek_storage
 from common.tg import extract_attachment_file_id, reply_with_attachment
 from settings import config
+
+if TYPE_CHECKING:
+    from aiogram.types import Message
 
 
 async def cmd_kek(message: Message):

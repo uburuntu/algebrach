@@ -1,7 +1,11 @@
+from typing import TYPE_CHECKING
+
 from aiogram import Router
 from aiogram.filters import Command, CommandStart
-from aiogram.types import Message
 from aiogram.utils.formatting import Bold, Code, Text, TextLink, as_line
+
+if TYPE_CHECKING:
+    from aiogram.types import Message
 
 router = Router()
 

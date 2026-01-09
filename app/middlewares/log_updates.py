@@ -1,7 +1,6 @@
 import time
 
-from collections.abc import Awaitable, Callable
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from aiogram import BaseMiddleware
 from aiogram.dispatcher.event.bases import UNHANDLED
@@ -11,6 +10,9 @@ from aiogram.types import (
 )
 from common.tg import chat_info, decompose_update, user_info
 from common.utils import get_logger
+
+if TYPE_CHECKING:
+    from collections.abc import Awaitable, Callable
 
 
 class LogUpdatesMiddleware(BaseMiddleware):

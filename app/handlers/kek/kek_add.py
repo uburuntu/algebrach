@@ -1,15 +1,22 @@
-from aiogram.types import Message
+from typing import TYPE_CHECKING
+
 from aiogram.utils.formatting import TextLink
 from airtable.kek_storage import kek_storage
 from common.tg import extract_attachment_info_with_url, reply_with_attachment
+
+if TYPE_CHECKING:
+    from aiogram.types import Message
 
 
 async def cmd_kek_add(message: Message, reply_to_message: Message):
     text = reply_to_message.html_text
 
-    attachment_type, attachment_file_id, attachment_filename, attachment_url = (
-        await extract_attachment_info_with_url(reply_to_message)
-    )
+    (
+        attachment_type,
+        attachment_file_id,
+        attachment_filename,
+        attachment_url,
+    ) = await extract_attachment_info_with_url(reply_to_message)
 
     await kek_storage.async_add(
         author=reply_to_message.from_user,
@@ -30,9 +37,12 @@ async def cmd_kek_add(message: Message, reply_to_message: Message):
 async def cmd_kek_push(message: Message, reply_to_message: Message):
     text = reply_to_message.html_text
 
-    attachment_type, attachment_file_id, attachment_filename, attachment_url = (
-        await extract_attachment_info_with_url(reply_to_message)
-    )
+    (
+        attachment_type,
+        attachment_file_id,
+        attachment_filename,
+        attachment_url,
+    ) = await extract_attachment_info_with_url(reply_to_message)
 
     await kek_storage.async_push(
         author=reply_to_message.from_user,

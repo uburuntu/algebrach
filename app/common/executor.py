@@ -1,6 +1,5 @@
 import asyncio
 
-from collections.abc import Callable
 from concurrent.futures.process import (
     BrokenProcessPool,
     ProcessPoolExecutor as _ProcessPoolExecutor,
@@ -9,9 +8,12 @@ from concurrent.futures.thread import (
     BrokenThreadPool,
     ThreadPoolExecutor as _ThreadPoolExecutor,
 )
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from throttler import ThrottlerSimultaneous
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 
 class _BaseExecutor:

@@ -1,8 +1,10 @@
-from collections.abc import Awaitable, Callable
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from aiogram.dispatcher.middlewares.user_context import UserContextMiddleware
 from aiogram.types import TelegramObject, Update
+
+if TYPE_CHECKING:
+    from collections.abc import Awaitable, Callable
 
 
 class EventContextMiddleware(UserContextMiddleware):

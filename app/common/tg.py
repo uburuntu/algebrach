@@ -1,8 +1,12 @@
-from aiogram import Bot
+from typing import TYPE_CHECKING
+
 from aiogram.exceptions import TelegramBadRequest
-from aiogram.types import Chat, Message, TelegramObject, Update, User
 
 from common.utils import one_liner
+
+if TYPE_CHECKING:
+    from aiogram import Bot
+    from aiogram.types import Chat, Message, TelegramObject, Update, User
 
 
 def user_info(user: User, sender_chat: Chat | None = None) -> str:
