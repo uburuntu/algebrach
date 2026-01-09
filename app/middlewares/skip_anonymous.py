@@ -1,5 +1,5 @@
 from collections import defaultdict
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 from typing import TYPE_CHECKING, Any
 
 from aiogram import BaseMiddleware
@@ -24,10 +24,10 @@ class SkipAnonymousMessagesMiddleware(BaseMiddleware):
     reply_interval = timedelta(hours=1)
 
     def __init__(self):
-        self.last_reply_dt = defaultdict(lambda: datetime.utcfromtimestamp(0))
+        self.last_reply_dt = defaultdict(lambda: datetime.fromtimestamp(0, tz=UTC))
 
     async def reply_once_in_interval(self, message: Message):
-        now_dt = datetime.utcnow()
+        now_dt = datetime.now(UTC)
 
         if now_dt - self.last_reply_dt[message.chat.id] < self.reply_interval:
             return
