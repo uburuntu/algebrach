@@ -8,9 +8,11 @@ import uuid
 
 from typing import TYPE_CHECKING
 
-from aiogram import Bot, F, Router
+from aiogram import Bot, F, Router, html
 from aiogram.types import (
     ChosenInlineResult,
+    InlineKeyboardButton,
+    InlineKeyboardMarkup,
     InlineQuery,
     InlineQueryResultArticle,
     InputTextMessageContent,
@@ -56,8 +58,16 @@ def kek_to_result(kek: dict) -> InlineQueryResultArticle:
         id=kek["id"],
         title=preview[:50] or "Кек",
         description=preview[50:100] if len(preview) > 50 else None,
-        input_message_content=InputTextMessageContent(message_text=text),
+        input_message_content=InputTextMessageContent(
+            message_text=html.quote(text),
+        ),
     )
+
+
+# Keyboard required to receive inline_message_id in ChosenInlineResult
+PLACEHOLDER_KEYBOARD = InlineKeyboardMarkup(
+    inline_keyboard=[[InlineKeyboardButton(text="⏳", callback_data="noop")]]
+)
 
 
 @router.inline_query(F.query == "")
@@ -70,6 +80,7 @@ async def inline_kek_random(query: InlineQuery) -> Any:
         input_message_content=InputTextMessageContent(
             message_text="🎲 Выбираю кек...",
         ),
+        reply_markup=PLACEHOLDER_KEYBOARD,
     )
     await query.answer([result], cache_time=CACHE_TIME, is_personal=False)
 
@@ -87,7 +98,7 @@ async def inline_kek_search(query: InlineQuery) -> Any:
             title="😢 Кеков не найдено",
             description=f"По запросу «{query.query[:30]}»",
             input_message_content=InputTextMessageContent(
-                message_text=f"🔍 Кеков по запросу «{query.query}» не найдено",
+                message_text=f"🔍 Кеков по запросу «{html.quote(query.query)}» не найдено",
             ),
         )
         await query.answer([result], cache_time=CACHE_TIME, is_personal=False)
@@ -116,5 +127,6 @@ async def chosen_random_kek(chosen: ChosenInlineResult, bot: Bot) -> None:
     kek = random.choice(text_keks)
     await bot.edit_message_text(
         inline_message_id=chosen.inline_message_id,
-        text=kek["fields"]["Text"],
+        text=html.quote(kek["fields"]["Text"]),
+        reply_markup=None,
     )
