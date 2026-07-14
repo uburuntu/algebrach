@@ -12,6 +12,7 @@ from handlers.kek.kek_inline import (
     inline_kek_random,
     inline_kek_search,
     kek_to_result,
+    noop_callback,
     search_keks,
 )
 
@@ -73,6 +74,13 @@ class TestSearchKeks:
         result = search_keks(keks, "HELLO")
 
         assert len(result) == 2
+
+    def test_uses_unicode_case_folding(self):
+        keks = [{"id": "1", "fields": {"Text": "Straße"}}]
+
+        result = search_keks(keks, "STRASSE")
+
+        assert [kek["id"] for kek in result] == ["1"]
 
     def test_no_matches(self):
         keks = [{"id": "1", "fields": {"Text": "Hello world"}}]
@@ -145,6 +153,15 @@ def make_chosen_result(
 
 
 class TestInlineKekRandom:
+    @pytest.mark.asyncio
+    async def test_acknowledges_placeholder_callback(self):
+        callback = MagicMock()
+        callback.answer = AsyncMock()
+
+        await noop_callback(callback)
+
+        callback.answer.assert_awaited_once_with()
+
     @pytest.mark.asyncio
     async def test_returns_single_random_option(self):
         query = make_inline_query("")

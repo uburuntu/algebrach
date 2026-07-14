@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import TYPE_CHECKING
 
 from aiogram import Router
@@ -34,6 +36,8 @@ async def cmd_help(message: Message):
             "• /kek — кек пек",
             "\n\n",
             "• /kek_add — отправляет цитируемое сообщение (reply) в предложку кеков",
+            "\n\n",
+            "• /kek_info — показывает статистику кеков",
             "\n\n",
             as_line("Обратная связь: ", Code("@rm_bk")),
             as_line(

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import TYPE_CHECKING
 
 from aiogram.utils.formatting import TextLink
@@ -17,6 +19,9 @@ async def cmd_kek_add(message: Message, reply_to_message: Message):
         attachment_filename,
         attachment_url,
     ) = await extract_attachment_info_with_url(reply_to_message)
+
+    if not text and not attachment_file_id:
+        return await message.reply("⛔ В сообщении нет поддерживаемого содержимого")
 
     await kek_storage.async_add(
         author=reply_to_message.from_user,
@@ -43,6 +48,9 @@ async def cmd_kek_push(message: Message, reply_to_message: Message):
         attachment_filename,
         attachment_url,
     ) = await extract_attachment_info_with_url(reply_to_message)
+
+    if not text and not attachment_file_id:
+        return await message.reply("⛔ В сообщении нет поддерживаемого содержимого")
 
     await kek_storage.async_push(
         author=reply_to_message.from_user,

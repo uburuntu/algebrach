@@ -48,6 +48,18 @@ class TestLogUpdatesMiddleware:
         assert result is UNHANDLED
 
     @pytest.mark.asyncio
+    async def test_logs_failed_update_and_reraises(self, middleware, mocker):
+        handler = AsyncMock(side_effect=ValueError("failed"))
+        spy = mocker.spy(middleware.logger, "exception")
+        update = make_update(message=make_message(text="Failure"))
+
+        with pytest.raises(ValueError, match="failed"):
+            await middleware(handler, update, {})
+
+        spy.assert_called_once()
+        assert "Failure" in spy.call_args.args[0]
+
+    @pytest.mark.asyncio
     async def test_raises_on_non_update_event(self, middleware, handler):
         non_update = MagicMock()
 

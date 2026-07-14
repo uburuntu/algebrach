@@ -139,6 +139,35 @@ fail the refresh while serving the last known-good snapshot.
 - Identity and ranking use record IDs or Telegram IDs, never display names.
 - Schema changes are tested before deployment.
 
+## P1: Make write workflows idempotent and reconcilable
+
+### Evidence and failure mode
+
+Adding a suggestion or approved kek upserts one or more users and then creates a
+separate content record. Airtable does not make those calls transactional. A
+caller can also time out while the synchronous worker later completes the
+request. Telegram redelivery or a user retry can therefore leave partial user
+state or duplicate content while the bot reports failure.
+
+### Target decision
+
+Assign every logical mutation a stable operation key derived from the source
+chat, source message, and operation type. Persist that key with the content and
+upsert by it. Make retries return the existing result rather than creating a new
+record. Add reconciliation for operations that created related user state but
+did not finish the content write.
+
+If Airtable cannot provide the required uniqueness and recovery guarantees,
+place a small transactional command/outbox store in front of it rather than
+simulating transactions in handlers.
+
+### Done when
+
+- Retrying or redelivering the same Telegram operation creates one content row.
+- Timeouts have a queryable final outcome.
+- Partial workflows are detected and reconciled.
+- Mutation contract tests cover provider failure after every remote step.
+
 ## P1: Replace request-time full-table I/O with a resilient read model
 
 ### Evidence and failure mode
@@ -287,8 +316,9 @@ adding replicas.
    writes, migrate records, and rotate the token.
 2. **Seams without behavior change:** canonical package entry point, composition
    root, repository protocols, typed records, and contract fixtures.
-3. **Resilience:** snapshot refresh, bounded concurrency, invalidation, stale
-   behavior, and provider outage tests.
+3. **Resilience:** idempotent mutations, reconciliation, snapshot refresh,
+   bounded concurrency, invalidation, stale behavior, and provider outage
+   tests.
 4. **Operations:** structured/redacted telemetry, real health semantics,
    immutable image delivery, smoke test, and rollback.
 5. **Policy and scale:** centralized authorization, content trust policy, then

@@ -63,6 +63,30 @@ class TestCmdKekAdd:
         assert "✅" in reply_text
         assert "предложку" in reply_text
 
+    @pytest.mark.asyncio
+    async def test_rejects_unsupported_empty_message(
+        self, mock_storage, author, suggestor
+    ):
+        reply_to = make_message(from_user=author, text=None, content_type="contact")
+        reply_to.html_text = ""
+        msg = make_message(from_user=suggestor, reply_to_message=reply_to)
+
+        with (
+            patch("handlers.kek.kek_add.kek_storage", mock_storage),
+            patch(
+                "handlers.kek.kek_add.extract_attachment_info_with_url",
+                new=AsyncMock(return_value=(None, None, None, None)),
+            ),
+        ):
+            from handlers.kek.kek_add import cmd_kek_add
+
+            await cmd_kek_add(msg, reply_to)
+
+        mock_storage.async_add.assert_not_awaited()
+        msg.reply.assert_awaited_once_with(
+            "⛔ В сообщении нет поддерживаемого содержимого"
+        )
+
 
 class TestCmdKekPush:
     @pytest.fixture
@@ -90,6 +114,29 @@ class TestCmdKekPush:
         mock_storage.async_push.assert_awaited_once()
         call_kwargs = mock_storage.async_push.call_args.kwargs
         assert call_kwargs["text"] == "Push this"
+
+    @pytest.mark.asyncio
+    async def test_rejects_unsupported_empty_message(self, mock_storage):
+        author = make_user(id=123, first_name="Admin")
+        reply_to = make_message(from_user=author, text=None, content_type="contact")
+        reply_to.html_text = ""
+        msg = make_message(from_user=author, reply_to_message=reply_to)
+
+        with (
+            patch("handlers.kek.kek_add.kek_storage", mock_storage),
+            patch(
+                "handlers.kek.kek_add.extract_attachment_info_with_url",
+                new=AsyncMock(return_value=(None, None, None, None)),
+            ),
+        ):
+            from handlers.kek.kek_add import cmd_kek_push
+
+            await cmd_kek_push(msg, reply_to)
+
+        mock_storage.async_push.assert_not_awaited()
+        msg.reply.assert_awaited_once_with(
+            "⛔ В сообщении нет поддерживаемого содержимого"
+        )
 
 
 class TestCmdKekAddNoReply:

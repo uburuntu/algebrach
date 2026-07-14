@@ -1,7 +1,9 @@
+from __future__ import annotations
+
 from typing import TYPE_CHECKING, Any
 
+from aiogram import BaseMiddleware
 from aiogram.dispatcher.event.bases import UNHANDLED
-from aiogram.dispatcher.middlewares.user_context import UserContextMiddleware
 
 if TYPE_CHECKING:
     from collections.abc import Awaitable, Callable
@@ -9,7 +11,7 @@ if TYPE_CHECKING:
     from aiogram.types import Message
 
 
-class ThrottleUsersMiddleware(UserContextMiddleware):
+class ThrottleUsersMiddleware(BaseMiddleware):
     """
     Skips user's message if there's ongoing handler for them
     """

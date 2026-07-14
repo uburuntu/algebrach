@@ -193,6 +193,30 @@ class TestDecomposeUpdate:
         assert chat == msg.chat
         assert info == "button_clicked"
 
+    @pytest.mark.parametrize("update_field", ["shipping_query", "pre_checkout_query"])
+    def test_payment_update_does_not_serialize_sensitive_payload(self, update_field):
+        user = make_user()
+        payment_query = MagicMock()
+        payment_query.id = "payment-query-id"
+        payment_query.from_user = user
+        update = make_update(**{update_field: payment_query})
+
+        _event, user_result, _sender_chat, _chat, info = decompose_update(update)
+
+        assert user_result == user
+        assert info == "id: payment-query-id"
+        payment_query.as_json.assert_not_called()
+
+    def test_unknown_update_does_not_serialize_raw_payload(self):
+        update = make_update(update_id=42)
+        update.as_json = MagicMock()
+
+        event, _user, _sender_chat, _chat, info = decompose_update(update)
+
+        assert event == update
+        assert info == "update_id: 42"
+        update.as_json.assert_not_called()
+
 
 # =============================================================================
 # extract_attachment_info tests
@@ -388,9 +412,12 @@ class TestReplyWithAttachment:
     async def test_reply_sticker(self):
         msg = make_message()
 
-        await reply_with_attachment(msg, "", "sticker", "sticker_id")
+        await reply_with_attachment(msg, "Sticker text", "sticker", "sticker_id")
 
-        msg.reply_sticker.assert_awaited_once_with("sticker_id", caption="")
+        msg.reply_sticker.assert_awaited_once_with("sticker_id")
+        msg.reply.assert_awaited_once_with(
+            "Sticker text", disable_web_page_preview=False
+        )
 
     @pytest.mark.asyncio
     async def test_reply_video(self):
@@ -404,9 +431,10 @@ class TestReplyWithAttachment:
     async def test_reply_video_note(self):
         msg = make_message()
 
-        await reply_with_attachment(msg, "", "video_note", "videonote_id")
+        await reply_with_attachment(msg, "Video note", "video_note", "videonote_id")
 
-        msg.reply_video_note.assert_awaited_once_with("videonote_id", caption="")
+        msg.reply_video_note.assert_awaited_once_with("videonote_id")
+        msg.reply.assert_awaited_once_with("Video note", disable_web_page_preview=False)
 
     @pytest.mark.asyncio
     async def test_reply_animation(self):
@@ -444,3 +472,39 @@ class TestReplyWithAttachment:
         msg.reply_photo.assert_awaited_with(
             "https://fallback.url/photo.jpg", caption="Caption"
         )
+
+    @pytest.mark.asyncio
+    async def test_video_note_does_not_fallback_to_url(self):
+        from aiogram.exceptions import TelegramBadRequest
+
+        msg = make_message()
+        msg.reply_video_note = AsyncMock(
+            side_effect=TelegramBadRequest(
+                method="sendVideoNote", message="file not found"
+            )
+        )
+
+        with pytest.raises(TelegramBadRequest):
+            await reply_with_attachment(
+                msg,
+                None,
+                "video_note",
+                "bad_id",
+                "https://fallback.url/video.mp4",
+            )
+
+        msg.reply_video_note.assert_awaited_once_with("bad_id")
+
+    @pytest.mark.asyncio
+    async def test_rejects_unknown_attachment_type(self):
+        msg = make_message()
+
+        with pytest.raises(ValueError, match="Unsupported attachment type"):
+            await reply_with_attachment(msg, "Text", "contact", "contact_id")
+
+    @pytest.mark.asyncio
+    async def test_rejects_missing_attachment_media(self):
+        msg = make_message()
+
+        with pytest.raises(ValueError, match="Missing media"):
+            await reply_with_attachment(msg, "Caption", "photo", None)

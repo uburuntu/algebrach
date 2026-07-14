@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from collections import defaultdict
 from datetime import UTC, datetime, timedelta
 from typing import TYPE_CHECKING, Any
@@ -19,7 +21,6 @@ class SkipAnonymousMessagesMiddleware(BaseMiddleware):
     """
 
     user_id_auto_forwards = 777000
-    user_id_anonymous_sender = 1087968824
 
     reply_interval = timedelta(hours=1)
 

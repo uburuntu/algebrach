@@ -99,7 +99,8 @@ celerybeat.pid
 
 # Environments
 .env
-.env.prod
+.env.*
+!.env.example
 .venv
 env/
 venv/
@@ -134,3 +135,7 @@ cython_debug/
 # IDEs
 .idea/
 .vscode/
+
+# Tool and OS caches
+.ruff_cache/
+.DS_Store

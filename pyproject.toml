@@ -9,7 +9,7 @@ authors = [{ name = "uburuntu", email = "ramzan.bekbulatov@pm.me" }]
 
 dependencies = [
     "aiocache==0.12.3",
-    "aiogram[fast,i18n,redis]==3.29.1",
+    "aiogram[fast]==3.29.1",
     "pydantic==2.12.5",
     "pydantic-settings==2.14.2",
     "pyairtable==3.3.0",
@@ -33,7 +33,7 @@ dev = [
 ]
 
 [build-system]
-requires = ["hatchling"]
+requires = ["hatchling==1.31.0"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]

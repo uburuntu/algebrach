@@ -3,7 +3,7 @@ from typing import Literal
 from pydantic import Field, HttpUrl
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-# Docs: https://docs.pydantic.dev/2.8/concepts/pydantic_settings/
+# Docs: https://docs.pydantic.dev/latest/concepts/pydantic_settings/
 
 
 class Settings(BaseSettings):
