@@ -3,7 +3,6 @@ import inspect
 
 import pytest
 
-
 MODULE_NAMES = (
     "airtable.kek_storage",
     "common.executor",
@@ -30,9 +29,7 @@ def test_runtime_signatures_are_introspectable(module_name):
             callables.append(value)
         elif inspect.isclass(value) and value.__module__ == module_name:
             callables.extend(
-                member
-                for member in vars(value).values()
-                if inspect.isfunction(member)
+                member for member in vars(value).values() if inspect.isfunction(member)
             )
 
     assert callables
