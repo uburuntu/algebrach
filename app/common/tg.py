@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import TYPE_CHECKING
 
 from aiogram.exceptions import TelegramBadRequest
@@ -68,10 +70,10 @@ def decompose_update(
         info = f.data
     elif f := update.shipping_query:
         user = f.from_user
-        info = f.as_json()
+        info = f"id: {f.id}"
     elif f := update.pre_checkout_query:
         user = f.from_user
-        info = f.as_json()
+        info = f"id: {f.id}"
     elif f := update.poll:
         info = (
             f"{one_liner(f.question, cut_len=50)} ({f.id}),"
@@ -89,7 +91,7 @@ def decompose_update(
         )
     else:
         f = update
-        info = update.as_json()
+        info = f"update_id: {update.update_id}"
 
     return f, user, sender_chat, chat, info
 
@@ -162,18 +164,34 @@ def extract_attachment_file_id(message: Message) -> str | None:
 
 async def reply_with_attachment(
     message: Message,
-    text: str,
-    attachment_type: str,
-    attachment_file_id: str,
+    text: str | None,
+    attachment_type: str | None,
+    attachment_file_id: str | None,
     attachment_url_fallback: str | None = None,
 ):
-    async def send(method):
+    async def send(
+        method,
+        *,
+        supports_caption: bool = True,
+        allow_url_fallback: bool = True,
+    ):
+        fallback = attachment_url_fallback if allow_url_fallback else None
+        attachment = attachment_file_id or fallback
+        if not attachment:
+            raise ValueError(f"Missing media for attachment type {attachment_type!r}")
+
+        kwargs = {"caption": text} if supports_caption else {}
         try:
-            return await method(attachment_file_id, caption=text)
+            reply = await method(attachment, **kwargs)
         except TelegramBadRequest:
-            if attachment_url_fallback:
-                return await method(attachment_url_fallback, caption=text)
-            raise
+            if not fallback or attachment == fallback:
+                raise
+            reply = await method(fallback, **kwargs)
+
+        if not supports_caption and text:
+            await message.reply(text, disable_web_page_preview=False)
+
+        return reply
 
     match attachment_type:
         case "photo":
@@ -183,14 +201,22 @@ async def reply_with_attachment(
         case "voice":
             return await send(message.reply_voice)
         case "sticker":
-            return await send(message.reply_sticker)
+            return await send(message.reply_sticker, supports_caption=False)
         case "video":
             return await send(message.reply_video)
         case "video_note":
-            return await send(message.reply_video_note)
+            return await send(
+                message.reply_video_note,
+                supports_caption=False,
+                allow_url_fallback=False,
+            )
         case "animation":
             return await send(message.reply_animation)
         case "document":
             return await send(message.reply_document)
         case None:
+            if not text:
+                raise ValueError("Text-only kek must contain text")
             return await message.reply(text, disable_web_page_preview=False)
+        case _:
+            raise ValueError(f"Unsupported attachment type: {attachment_type!r}")

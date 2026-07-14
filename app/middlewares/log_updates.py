@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import time
 
 from typing import TYPE_CHECKING, Any
@@ -47,7 +49,13 @@ class LogUpdatesMiddleware(BaseMiddleware):
 
         start_time = time.monotonic()
 
-        response = await handler(event, data)
+        try:
+            response = await handler(event, data)
+        except Exception:
+            elapsed_ms = round((time.monotonic() - start_time) * 1000)
+            log = self.log_string(update=event, elapsed_ms=elapsed_ms)
+            self.logger.exception(log)
+            raise
 
         elapsed_ms = round((time.monotonic() - start_time) * 1000)
         log = self.log_string(update=event, elapsed_ms=elapsed_ms)

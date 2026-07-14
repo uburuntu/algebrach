@@ -58,6 +58,15 @@ class TestCmdHelp:
         assert "/kek_add" in call_kwargs["text"]
 
     @pytest.mark.asyncio
+    async def test_includes_kek_info_command(self):
+        msg = make_message()
+
+        await cmd_help(msg)
+
+        call_kwargs = msg.reply.call_args.kwargs
+        assert "/kek_info" in call_kwargs["text"]
+
+    @pytest.mark.asyncio
     async def test_includes_github_link(self):
         msg = make_message()
 

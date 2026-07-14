@@ -12,8 +12,8 @@ FROM python:3.14-slim AS builder
 ##             └── __main__.py
 #
 
-# Copy uv binary from official image
-COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
+# Copy a reproducibly versioned uv binary from the official image
+COPY --from=ghcr.io/astral-sh/uv:0.11.28 /uv /uvx /bin/
 
 # Set up a working directory
 WORKDIR /usr/app

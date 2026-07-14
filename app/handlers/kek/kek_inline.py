@@ -3,6 +3,8 @@
 Allows users to search and send keks from any chat by typing @algebrach_bot.
 """
 
+from __future__ import annotations
+
 import random
 import uuid
 
@@ -10,6 +12,7 @@ from typing import TYPE_CHECKING
 
 from aiogram import Bot, F, Router, html
 from aiogram.types import (
+    CallbackQuery,
     ChosenInlineResult,
     InlineKeyboardButton,
     InlineKeyboardMarkup,
@@ -39,10 +42,10 @@ def get_text_keks(keks: list[dict]) -> list[dict]:
 
 def search_keks(keks: list[dict], query: str, limit: int = 10) -> list[dict]:
     """Case-insensitive substring search with early exit on limit."""
-    query_lower = query.lower()
+    query_casefolded = query.casefold()
     results = []
     for k in keks:
-        if query_lower in k["fields"]["Text"].lower():
+        if query_casefolded in k["fields"]["Text"].casefold():
             results.append(k)
             if len(results) >= limit:
                 break
@@ -66,8 +69,14 @@ def kek_to_result(kek: dict) -> InlineQueryResultArticle:
 
 # Keyboard required to receive inline_message_id in ChosenInlineResult
 PLACEHOLDER_KEYBOARD = InlineKeyboardMarkup(
-    inline_keyboard=[[InlineKeyboardButton(text="⏳", callback_data="noop")]]
+    inline_keyboard=[[InlineKeyboardButton(text="Загрузка…", callback_data="noop")]]
 )
+
+
+@router.callback_query(F.data == "noop")
+async def noop_callback(callback: CallbackQuery) -> None:
+    """Acknowledge placeholder clicks while the random result is loading."""
+    await callback.answer()
 
 
 @router.inline_query(F.query == "")
