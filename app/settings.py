@@ -22,6 +22,12 @@ class Settings(BaseSettings):
     # Allows to detect environment
     is_docker: bool = False
 
+    # Destructive startup behavior must be explicitly enabled
+    drop_pending_updates: bool = False
+
+    # Bound task fan-out while polling Telegram updates
+    polling_tasks_concurrency_limit: int = Field(default=32, ge=1)
+
     # Token got from https://t.me/BotFather
     telegram_bot_token: str
 
