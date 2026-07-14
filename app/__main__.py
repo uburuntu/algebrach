@@ -29,9 +29,12 @@ async def main():
 
     dp.include_routers(basic.router, kek.router)
 
-    await bot.delete_webhook(drop_pending_updates=config.environment != "prod")
+    await bot.delete_webhook(drop_pending_updates=config.drop_pending_updates)
 
-    await dp.start_polling(bot)
+    await dp.start_polling(
+        bot,
+        tasks_concurrency_limit=config.polling_tasks_concurrency_limit,
+    )
 
 
 if __name__ == "__main__":
