@@ -72,23 +72,30 @@ uv run python -u __main__.py
 
 ```bash
 # To init (required only once)
-pre-commit install --install-hooks
+uv run pre-commit install --install-hooks
 
 # To check hooks before commit
-pre-commit run
+uv run pre-commit run --all-files
 ```
 
 [Ruff](https://github.com/astral-sh/ruff/) for linting and formatting, with settings from [pyproject.toml](pyproject.toml) file:
 
 ```bash
 # To format project files
-ruff format .
+uv run ruff format .
 
 # To detect linter issues and auto fix them where applicable
-ruff check --fix .
+uv run ruff check --fix .
 
 # To run ruff in a watcher mode to check any file edit
-ruff check --fix . --watch
+uv run ruff check --fix . --watch
+```
+
+Run the automated tests and dependency audit from the repository root:
+
+```bash
+uv run pytest
+uv run pip-audit
 ```
 
 ## Deploy on a server
@@ -102,5 +109,8 @@ git pull
 Build and start Docker container:
 
 ```bash
-docker-compose up --build -d --force-recreate
+docker compose up --build -d --force-recreate
 ```
+
+See [Next-stage architecture](docs/next-stage-architecture.md) for the prioritized
+structural improvements that are intentionally outside routine maintenance.

@@ -8,13 +8,23 @@ on:
     branches:
       - main
 
+permissions:
+  contents: read
+
+concurrency:
+  group: tests-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
+      with:
+        persist-credentials: false
 
     - name: Install uv
       uses: astral-sh/setup-uv@v5
@@ -23,10 +33,16 @@ jobs:
       run: uv python install 3.14
 
     - name: Install dependencies
-      run: uv sync
+      run: uv sync --locked
 
     - name: Run pre-commit hooks
       run: uv run pre-commit run --all-files
 
+    - name: Audit dependencies
+      run: uv run pip-audit
+
     - name: Run tests
       run: uv run pytest
+
+    - name: Build container image
+      run: docker build --tag algebrach:test .

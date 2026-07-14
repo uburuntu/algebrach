@@ -3,6 +3,9 @@
 import asyncio
 import time
 
+from concurrent.futures.thread import BrokenThreadPool
+from unittest.mock import MagicMock
+
 import pytest
 
 from app.common.executor import ProcessPoolExecutor, ThreadPoolExecutor
@@ -73,12 +76,36 @@ class TestThreadPoolExecutor:
         assert elapsed >= 0.15
         executor.shutdown(wait=True)
 
+    @pytest.mark.asyncio
+    async def test_recovers_from_broken_executor_without_deadlocking(self):
+        executor = ThreadPoolExecutor(max_workers=1)
+        broken_executor = MagicMock()
+        broken_executor.submit.side_effect = BrokenThreadPool("broken")
+        executor._executor = broken_executor
+
+        result = await asyncio.wait_for(executor.run(add_numbers, 3, 4), timeout=1)
+
+        assert result == (7, False)
+        broken_executor.shutdown.assert_called_once_with(
+            wait=False, cancel_futures=True
+        )
+        executor.shutdown(wait=True)
+
+    def test_shutdown_does_not_initialize_executor(self):
+        executor = ThreadPoolExecutor(max_workers=1)
+
+        result = executor.shutdown(wait=False)
+
+        assert result is None
+        assert executor._executor is None
+
     def test_shutdown(self):
         executor = ThreadPoolExecutor(max_workers=1)
         _ = executor.executor  # Initialize
 
         executor.shutdown(wait=True)
-        # Should not raise
+
+        assert executor._executor is None
 
 
 def can_use_process_pool():

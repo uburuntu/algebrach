@@ -26,12 +26,13 @@ class TestLogUpdatesMiddleware:
         msg = make_message(text="Hello world")
         update = make_update(message=msg)
 
-        await middleware(handler, update, {})
+        result = await middleware(handler, update, {})
 
         spy.assert_called_once()
         log_message = spy.call_args[0][0]
         assert "Message" in log_message
         assert "Hello world" in log_message
+        assert result == "result"
 
     @pytest.mark.asyncio
     async def test_logs_unhandled_update_as_debug(self, middleware, mocker):
@@ -41,9 +42,10 @@ class TestLogUpdatesMiddleware:
         msg = make_message(text="Ignored")
         update = make_update(message=msg)
 
-        await middleware(handler, update, {})
+        result = await middleware(handler, update, {})
 
         spy.assert_called_once()
+        assert result is UNHANDLED
 
     @pytest.mark.asyncio
     async def test_raises_on_non_update_event(self, middleware, handler):

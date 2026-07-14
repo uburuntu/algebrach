@@ -53,6 +53,8 @@ class LogUpdatesMiddleware(BaseMiddleware):
         log = self.log_string(update=event, elapsed_ms=elapsed_ms)
 
         if response is UNHANDLED:
-            return self.logger.debug(log)
+            self.logger.debug(log)
+        else:
+            self.logger.info(log)
 
-        return self.logger.info(log)
+        return response
