@@ -13,6 +13,9 @@ if TYPE_CHECKING:
 async def cmd_kek(message: Message):
     keks = await kek_storage.async_all()
 
+    if not keks:
+        return await message.reply("😢 Кеков пока нет")
+
     kek = random.choice(keks)
     kek_fields = kek["fields"]
 

@@ -13,25 +13,30 @@ async def cmd_kek_info(message: Message):
     users = await kek_storage.async_all_users()
 
     attachment_types = Counter(
-        kek["fields"].get("AttachmentType", "text") for kek in keks
+        kek["fields"].get("AttachmentType") or "text" for kek in keks
     )
-    authors = Counter()
-    suggestors = Counter()
-    user_ids = {}
 
-    for user in users:
-        name = user["fields"].get("Name", "Unknown")
-        user_ids[name] = user["fields"].get("TelegramID", "")
-        authors[name] = len(user["fields"].get("Author", []))
-        suggestors[name] = len(user["fields"].get("Suggestor", []))
-
-    def format_user_list(user_counter):
+    def format_user_list(field_name):
+        ranked_users = sorted(
+            (
+                (
+                    user["fields"].get("Name") or "Unknown",
+                    user["fields"].get("TelegramID"),
+                    len(user["fields"].get(field_name, [])),
+                )
+                for user in users
+            ),
+            key=lambda item: (-item[2], item[0].casefold()),
+        )
         return [
             as_line(
-                "• ", TextLink(name, url=f"tg://user?id={user_ids[name]}"), f": {count}"
+                "• ",
+                TextLink(name, url=f"tg://user?id={user_id}") if user_id else name,
+                f": {count}",
             )
-            for name, count in user_counter.most_common(6)
-        ]
+            for name, user_id, count in ranked_users
+            if count > 0
+        ][:5]
 
     return await message.reply(
         **Text(
@@ -47,11 +52,11 @@ async def cmd_kek_info(message: Message):
             "\n",
             Bold("Топ 5 авторов:"),
             "\n",
-            *format_user_list(authors),
+            *format_user_list("Author"),
             "\n",
             Bold("Топ 5 предложивших:"),
             "\n",
-            *format_user_list(suggestors),
+            *format_user_list("Suggestor"),
         ).as_kwargs(),
         disable_notification=True,
     )

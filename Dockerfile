@@ -8,8 +8,8 @@ FROM python:3.14-slim AS builder
 ## └── usr
 ##     └── app
 ##         ├── .venv/
-##         ├── __main__.py
-##         └── entrypoint.sh
+##         └── app/
+##             └── __main__.py
 #
 
 # Copy uv binary from official image
@@ -29,8 +29,8 @@ RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --locked --no-install-project --no-dev
 
 # Copy application code
-COPY app .
-COPY pyproject.toml uv.lock README.md ./
+COPY app ./app
+COPY pyproject.toml uv.lock README.md LICENSE ./
 
 # Sync the project
 RUN --mount=type=cache,target=/root/.cache/uv \
@@ -54,8 +54,8 @@ COPY --from=builder --chown=app:app /usr/app /usr/app
 # Remove root permissions by using a restricted user
 USER app
 
-# Healthcheck to check the process is running
-HEALTHCHECK CMD pgrep -f "python" >/dev/null
+# Check that the container's main process is the bot
+HEALTHCHECK CMD ["python", "-c", "import sys; from pathlib import Path; sys.exit(b'app/__main__.py' not in Path('/proc/1/cmdline').read_bytes())"]
 
 # App's main entrypoint
-ENTRYPOINT ["bash", "entrypoint.sh"]
+ENTRYPOINT ["python", "-u", "app/__main__.py"]

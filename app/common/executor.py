@@ -37,22 +37,29 @@ class _BaseExecutor:
         self, func: Callable, *args, timeout: float | None = 180
     ) -> tuple[Any, bool]:
         async with self.throttler:
-            try:
-                future = asyncio.get_running_loop().run_in_executor(
-                    self.executor, func, *args
-                )
+            for attempt in range(2):
                 try:
-                    result = await asyncio.wait_for(future, timeout=timeout)
-                except asyncio.exceptions.TimeoutError:
-                    return None, True
-                return result, False
-            except self.ExecutorExceptionClass:
-                self._executor.shutdown(wait=False, cancel_futures=True)
-                self._executor = None
-                return await self.run(func, *args, timeout)
+                    future = asyncio.get_running_loop().run_in_executor(
+                        self.executor, func, *args
+                    )
+                    try:
+                        result = await asyncio.wait_for(future, timeout=timeout)
+                    except TimeoutError:
+                        return None, True
+                    return result, False
+                except self.ExecutorExceptionClass:
+                    self.shutdown(wait=False)
+                    if attempt == 1:
+                        raise
+
+        raise RuntimeError("Executor retry loop exited unexpectedly")
 
     def shutdown(self, wait: bool):
-        return self.executor.shutdown(wait=wait, cancel_futures=True)
+        if self._executor is None:
+            return None
+
+        executor, self._executor = self._executor, None
+        return executor.shutdown(wait=wait, cancel_futures=True)
 
 
 class ThreadPoolExecutor(_BaseExecutor):

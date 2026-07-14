@@ -113,6 +113,25 @@ class TestCmdKekInfo:
         assert "photo" in call_kwargs["text"]
 
     @pytest.mark.asyncio
+    async def test_treats_empty_attachment_type_as_text(self, mock_storage):
+        mock_storage.async_all = AsyncMock(
+            return_value=[
+                {
+                    "id": "rec1",
+                    "fields": {"Text": "Text kek", "AttachmentType": None},
+                }
+            ]
+        )
+        msg = make_message()
+
+        with patch("handlers.kek.kek_info.kek_storage", mock_storage):
+            from handlers.kek.kek_info import cmd_kek_info
+
+            await cmd_kek_info(msg)
+
+        assert "text: 1" in msg.reply.call_args.kwargs["text"]
+
+    @pytest.mark.asyncio
     async def test_shows_top_authors(self, mock_storage):
         msg = make_message()
 
@@ -137,3 +156,65 @@ class TestCmdKekInfo:
 
         call_kwargs = msg.reply.call_args.kwargs
         assert call_kwargs.get("disable_notification") is True
+
+    @pytest.mark.asyncio
+    async def test_limits_rankings_to_five_users(self, mock_storage):
+        mock_storage.async_all_users = AsyncMock(
+            return_value=[
+                {
+                    "id": f"user{index}",
+                    "fields": {
+                        "Name": f"User {index}",
+                        "TelegramID": index,
+                        "Author": [f"rec{item}" for item in range(6 - index)],
+                    },
+                }
+                for index in range(6)
+            ]
+        )
+        msg = make_message()
+
+        with patch("handlers.kek.kek_info.kek_storage", mock_storage):
+            from handlers.kek.kek_info import cmd_kek_info
+
+            await cmd_kek_info(msg)
+
+        text = msg.reply.call_args.kwargs["text"]
+        assert "User 4" in text
+        assert "User 5" not in text
+
+    @pytest.mark.asyncio
+    async def test_keeps_users_with_duplicate_names_separate(self, mock_storage):
+        mock_storage.async_all_users = AsyncMock(
+            return_value=[
+                {
+                    "id": "user1",
+                    "fields": {
+                        "Name": "Same Name",
+                        "TelegramID": 101,
+                        "Author": ["rec1", "rec2"],
+                    },
+                },
+                {
+                    "id": "user2",
+                    "fields": {
+                        "Name": "Same Name",
+                        "TelegramID": 202,
+                        "Author": ["rec3"],
+                    },
+                },
+            ]
+        )
+        msg = make_message()
+
+        with patch("handlers.kek.kek_info.kek_storage", mock_storage):
+            from handlers.kek.kek_info import cmd_kek_info
+
+            await cmd_kek_info(msg)
+
+        call_kwargs = msg.reply.call_args.kwargs
+        text = call_kwargs["text"]
+        assert text.count("Same Name") == 2
+        urls = {entity.url for entity in call_kwargs["entities"] if entity.url}
+        assert "tg://user?id=101" in urls
+        assert "tg://user?id=202" in urls

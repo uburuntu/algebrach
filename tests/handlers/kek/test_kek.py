@@ -66,6 +66,18 @@ class TestCmdKek:
         )
 
     @pytest.mark.asyncio
+    async def test_empty_storage_returns_user_friendly_reply(self, mock_storage):
+        mock_storage.async_all = AsyncMock(return_value=[])
+        msg = make_message()
+
+        with patch("handlers.kek.kek.kek_storage", mock_storage):
+            from handlers.kek.kek import cmd_kek
+
+            await cmd_kek(msg)
+
+        msg.reply.assert_awaited_once_with("😢 Кеков пока нет")
+
+    @pytest.mark.asyncio
     async def test_kek_with_photo(self, mock_storage):
         mock_storage.async_all = AsyncMock(
             return_value=[

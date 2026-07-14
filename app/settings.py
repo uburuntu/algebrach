@@ -1,3 +1,5 @@
+from typing import Literal
+
 from pydantic import Field, HttpUrl
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -15,7 +17,7 @@ class Settings(BaseSettings):
     app_name: str = "algebrach"
 
     # Allows to detect type of deployment
-    environment: str = Field(pattern=r"dev|test|prod")
+    environment: Literal["dev", "test", "prod"]
 
     # Allows to detect environment
     is_docker: bool = False
