@@ -104,6 +104,3 @@ cp app/.env.example app/.env.prod
 # Set ENVIRONMENT=prod and replace the example tokens in app/.env.prod
 docker compose up --build -d --force-recreate
 ```
-
-See [Next-stage architecture](docs/next-stage-architecture.md) for the prioritized
-structural improvements that are intentionally outside routine maintenance.
